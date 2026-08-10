@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
 
-frontend:
+  frontend:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
