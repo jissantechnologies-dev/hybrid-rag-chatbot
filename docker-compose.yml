@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
 
-  frontend:
+frontend:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
@@ -19,3 +19,9 @@ services:
       - "8501:8501"
     depends_on:
       - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hybrid-rag.rule=Host(`jissantechnologies.online`)"
+      - "traefik.http.routers.hybrid-rag.entrypoints=websecure"
+      - "traefik.http.routers.hybrid-rag.tls.certresolver=letsencrypt"
+      - "traefik.http.services.hybrid-rag.loadbalancer.server.port=8501"
