@@ -24,4 +24,5 @@ services:
       - "traefik.http.routers.hybrid-rag.rule=Host(`jissantechnologies.online`)"
       - "traefik.http.routers.hybrid-rag.entrypoints=websecure"
       - "traefik.http.routers.hybrid-rag.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hybrid-rag.tls=true"
       - "traefik.http.services.hybrid-rag.loadbalancer.server.port=8501"
