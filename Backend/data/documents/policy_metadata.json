@@ -1,0 +1,414 @@
+{
+  "dataset_name": "Internal Policy RAG Dataset",
+  "documents": [
+    {
+      "document_id": "HR-LEAVE-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Employee Leave Policy",
+      "department": "HR",
+      "version": "3.0",
+      "effective_date": "2026-01-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Annual Leave"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Casual Leave"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Casual Leave Carry Forward"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Sick Leave"
+        },
+        {
+          "section_id": "5",
+          "title": "5. Leave Approval"
+        }
+      ]
+    },
+    {
+      "document_id": "HR-ATT-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Attendance and Working Hours Policy",
+      "department": "HR",
+      "version": "2.1",
+      "effective_date": "2026-02-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Working Hours"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Attendance"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Late Arrival"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Attendance Correction"
+        }
+      ]
+    },
+    {
+      "document_id": "HR-ONBOARD-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Employee Onboarding Policy",
+      "department": "HR",
+      "version": "1.4",
+      "effective_date": "2026-01-15",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Joining Documents"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Orientation"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Probation"
+        },
+        {
+          "section_id": "4",
+          "title": "4. First-Month Support"
+        }
+      ]
+    },
+    {
+      "document_id": "HR-WFH-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Work From Home Policy",
+      "department": "HR",
+      "version": "2.0",
+      "effective_date": "2026-03-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Eligibility"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Approval"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Equipment"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Availability"
+        }
+      ]
+    },
+    {
+      "document_id": "HR-BEN-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Employee Benefits Policy",
+      "department": "HR",
+      "version": "1.8",
+      "effective_date": "2026-01-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Health Coverage"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Dependents"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Benefit Changes"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Questions"
+        }
+      ]
+    },
+    {
+      "document_id": "FIN-TRAVEL-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Travel Reimbursement Policy",
+      "department": "Finance",
+      "version": "4.0",
+      "effective_date": "2026-04-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Purpose"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Client Travel"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Meals"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Transport"
+        },
+        {
+          "section_id": "5",
+          "title": "5. Claims"
+        }
+      ]
+    },
+    {
+      "document_id": "FIN-CLIENT-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Client Expense and Entertainment Policy",
+      "department": "Finance",
+      "version": "2.2",
+      "effective_date": "2026-02-15",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Client Meals"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Approval"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Receipts"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Non-Reimbursable Items"
+        }
+      ]
+    },
+    {
+      "document_id": "IT-LAPTOP-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "IT Laptop Request Policy",
+      "department": "IT",
+      "version": "3.1",
+      "effective_date": "2026-01-10",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Request Form"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Replacement"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Approval"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Standard Device"
+        }
+      ]
+    },
+    {
+      "document_id": "IT-ACCESS-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "IT Access Control Policy",
+      "department": "IT",
+      "version": "2.5",
+      "effective_date": "2026-03-10",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Access Requests"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Least Privilege"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Review"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Offboarding"
+        }
+      ]
+    },
+    {
+      "document_id": "OPS-CLIENT-2026",
+      "file_name": "company_policy_handbook_10_pages.pdf",
+      "title": "Operations Client Visit Policy",
+      "department": "Operations",
+      "version": "1.6",
+      "effective_date": "2026-01-20",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Visit Approval"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Travel Plan"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Safety"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Reporting"
+        }
+      ]
+    },
+    {
+      "document_id": "FIN-APPROVAL-2026",
+      "file_name": "company_policies_additional_5_pages.pdf",
+      "title": "Finance Expense Approval Policy",
+      "department": "Finance",
+      "version": "2.0",
+      "effective_date": "2026-01-05",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Approval Levels"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Advance Requests"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Exceptions"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Audit"
+        }
+      ]
+    },
+    {
+      "document_id": "IT-SOFTWARE-2026",
+      "file_name": "company_policies_additional_5_pages.pdf",
+      "title": "IT Software Request Policy",
+      "department": "IT",
+      "version": "2.3",
+      "effective_date": "2026-02-20",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Software Requests"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Security Review"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Licensing"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Installation"
+        }
+      ]
+    },
+    {
+      "document_id": "IT-REMOTE-2026",
+      "file_name": "company_policies_additional_5_pages.pdf",
+      "title": "IT Remote Access Policy",
+      "department": "IT",
+      "version": "1.9",
+      "effective_date": "2026-03-05",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. VPN"
+        },
+        {
+          "section_id": "2",
+          "title": "2. MFA"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Public Networks"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Lost Devices"
+        }
+      ]
+    },
+    {
+      "document_id": "OPS-PROC-2026",
+      "file_name": "company_policies_additional_5_pages.pdf",
+      "title": "Operations Procurement Policy",
+      "department": "Operations",
+      "version": "2.4",
+      "effective_date": "2026-02-01",
+      "status": "Active",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Purchase Requests"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Quotations"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Approval"
+        },
+        {
+          "section_id": "4",
+          "title": "4. Emergency Purchases"
+        }
+      ]
+    },
+    {
+      "document_id": "HR-LEAVE-2024",
+      "file_name": "company_policies_additional_5_pages.pdf",
+      "title": "Superseded Leave Policy",
+      "department": "HR",
+      "version": "2.0",
+      "effective_date": "2024-01-01",
+      "status": "Superseded",
+      "sections": [
+        {
+          "section_id": "1",
+          "title": "1. Historical Rule"
+        },
+        {
+          "section_id": "2",
+          "title": "2. Supersession"
+        },
+        {
+          "section_id": "3",
+          "title": "3. Historical Use"
+        }
+      ]
+    }
+  ]
+}

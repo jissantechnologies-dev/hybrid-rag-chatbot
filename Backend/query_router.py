@@ -14,57 +14,99 @@ llm = ChatOpenAI(
 def classify_question(question: str):
 
     prompt = f"""
-You are a query router for a Hybrid RAG system.
+You are a query planner for a Hybrid RAG system.
 
-Identify which retrieval categories are needed to answer
-the user's question.
+Your job is to determine which retrieval methods are useful
+for answering the user's question.
 
-Available categories:
+Available retrieval methods:
 
-- founder
-- ceo
-- product
-- general
+1. vector
 
-A question can have MORE THAN ONE category.
+Use vector retrieval for:
+- factual information
+- policies
+- descriptions
+- procedures
+- documents
+- manuals
+- FAQs
+- general knowledge contained in the document collection
 
-Return ONLY valid JSON in this format:
+2. graph
+
+Use graph retrieval when the question requires:
+- entities
+- relationships
+- connections
+- ownership
+- people
+- organizations
+- products
+- structured relationships stored in Neo4j
+
+3. both
+
+Use both when the question requires information from
+documents AND relationships/entities.
+
+Return ONLY valid JSON.
+
+Format:
 
 {{
-    "intents": ["founder", "product"]
+    "retrieval": "vector"
+}}
+
+or:
+
+{{
+    "retrieval": "graph"
+}}
+
+or:
+
+{{
+    "retrieval": "both"
 }}
 
 Examples:
 
 Question:
+How many casual leaves can employees carry forward?
+
+Answer:
+{{"retrieval": "vector"}}
+
+Question:
+What is the laptop reimbursement limit?
+
+Answer:
+{{"retrieval": "vector"}}
+
+Question:
 Who founded Apple?
 
 Answer:
-{{"intents": ["founder"]}}
+{{"retrieval": "both"}}
 
 Question:
-Who runs Apple?
+Who is the CEO of Apple?
 
 Answer:
-{{"intents": ["ceo"]}}
+{{"retrieval": "both"}}
 
 Question:
-What products does Apple make?
+What products are connected to Apple?
 
 Answer:
-{{"intents": ["product"]}}
+{{"retrieval": "graph"}}
 
 Question:
-What is the iPhone?
+Explain the company's travel reimbursement policy.
 
 Answer:
-{{"intents": ["general"]}}
-
-Question:
-Who founded Apple and what products does Apple produce?
-
-Answer:
-{{"intents": ["founder", "product"]}}
+{{"retrieval": "vector"}}
 
 Question:
 {question}
@@ -77,10 +119,23 @@ Answer:
     text = response.content.strip()
 
     try:
+
         result = json.loads(text)
 
-        return result["intents"]
+        retrieval = result.get(
+            "retrieval",
+            "vector"
+        )
+
+        if retrieval not in [
+            "vector",
+            "graph",
+            "both"
+        ]:
+            return "vector"
+
+        return retrieval
 
     except Exception:
 
-        return ["general"]
+        return "vector"

@@ -1,102 +1,208 @@
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_core.embeddings import Embeddings
-from sentence_transformers import SentenceTransformer
-
-
-
+import json
 from pathlib import Path
+
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    Docx2txtLoader,
+    TextLoader,
+)
+
+from langchain_core.documents import Document
+
+from langchain_text_splitters import (
+    RecursiveCharacterTextSplitter
+)
+
+
+# ============================================================
+# PATHS
+# ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent
 
-PDF_PATH = BASE_DIR / "data" / "sample_apple_knowledge_base.pdf"
-
-FAISS_PATH = BASE_DIR / "data" / "faiss_index"
-
-# --------------------------------
-# Step 1: Load PDF
-# --------------------------------
-
-loader = PyPDFLoader(PDF_PATH)
-
-documents = loader.load()
-
-print("PDF loaded successfully!")
-print("Number of pages:", len(documents))
+DOCUMENTS_DIR = (
+    BASE_DIR
+    / "data"
+    / "documents"
+)
 
 
-# --------------------------------
-# Step 2: Split documents
-# --------------------------------
+# ============================================================
+# TEXT SPLITTER
+# ============================================================
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=100
 )
 
-chunks = text_splitter.split_documents(documents)
+
+# ============================================================
+# LOAD SINGLE FILE
+# ============================================================
+
+def load_document(file_path):
+
+    file_path = Path(file_path)
+
+    extension = file_path.suffix.lower()
+
+    print(
+        f"Processing: {file_path.name}"
+    )
 
 
-print("\nPDF split successfully!")
-print("Number of chunks:", len(chunks))
+    # --------------------------------------------------------
+    # PDF
+    # --------------------------------------------------------
 
-# --------------------------------
-# Step 3: Load embedding model
-# --------------------------------
+    if extension == ".pdf":
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+        loader = PyPDFLoader(
+            str(file_path)
+        )
 
-print("\nEmbedding model loaded successfully!")
+        documents = loader.load()
 
-# --------------------------------
-# Step 4: Generate embeddings
-# --------------------------------
+        for document in documents:
 
-texts = [chunk.page_content for chunk in chunks]
+            document.metadata["source"] = (
+                file_path.name
+            )
 
-embeddings = model.encode(texts)
+            document.metadata["file_type"] = "pdf"
 
-print("Embeddings generated successfully!")
-
-print("Number of embeddings:", len(embeddings))
-
-print("Embedding dimension:", embeddings.shape[1])
+        return documents
 
 
-# --------------------------------
-# Step 5: Create LangChain
-# compatible embedding class
-# --------------------------------
+    # --------------------------------------------------------
+    # DOCX
+    # --------------------------------------------------------
 
-class SentenceTransformerEmbeddings(Embeddings):
+    elif extension == ".docx":
 
-    def embed_documents(self, texts):
-        return model.encode(texts).tolist()
+        loader = Docx2txtLoader(
+            str(file_path)
+        )
 
-    def embed_query(self, text):
-        return model.encode([text])[0].tolist()
+        documents = loader.load()
 
+        for document in documents:
 
-embedding_function = SentenceTransformerEmbeddings()
+            document.metadata["source"] = (
+                file_path.name
+            )
 
+            document.metadata["file_type"] = "docx"
 
-# --------------------------------
-# Step 6: Create FAISS vector store
-# --------------------------------
-
-vector_store = FAISS.from_documents(
-    chunks,
-    embedding_function
-)
-
-print("\nFAISS vector store created successfully!")
+        return documents
 
 
-# --------------------------------
-# Step 7: Save FAISS index
-# --------------------------------
+    # --------------------------------------------------------
+    # TXT
+    # --------------------------------------------------------
 
-vector_store.save_local(FAISS_PATH)
+    elif extension == ".txt":
 
-print(f"FAISS index saved to: {FAISS_PATH}")
+        loader = TextLoader(
+            str(file_path),
+            encoding="utf-8"
+        )
+
+        documents = loader.load()
+
+        for document in documents:
+
+            document.metadata["source"] = (
+                file_path.name
+            )
+
+            document.metadata["file_type"] = "txt"
+
+        return documents
+
+
+    # --------------------------------------------------------
+    # JSON
+    # --------------------------------------------------------
+
+    elif extension == ".json":
+
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            json_data = json.load(file)
+
+
+        json_text = json.dumps(
+            json_data,
+            indent=2,
+            ensure_ascii=False
+        )
+
+
+        document = Document(
+            page_content=json_text,
+            metadata={
+                "source": file_path.name,
+                "file_type": "json"
+            }
+        )
+
+        return [document]
+
+
+    # --------------------------------------------------------
+    # UNSUPPORTED
+    # --------------------------------------------------------
+
+    else:
+
+        raise ValueError(
+            f"Unsupported file type: "
+            f"{extension}"
+        )
+
+
+# ============================================================
+# INGEST ONE FILE
+# ============================================================
+
+def ingest_file(file_path):
+
+    print(
+        f"\nLoading document: "
+        f"{file_path}"
+    )
+
+
+    # --------------------------------------------------------
+    # Load
+    # --------------------------------------------------------
+
+    documents = load_document(
+        file_path
+    )
+
+    print(
+        f"Loaded {len(documents)} sections"
+    )
+
+
+    # --------------------------------------------------------
+    # Split
+    # --------------------------------------------------------
+
+    chunks = text_splitter.split_documents(
+        documents
+    )
+
+    print(
+        f"Created {len(chunks)} chunks"
+    )
+
+
+    return chunks

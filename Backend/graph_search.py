@@ -4,6 +4,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+# --------------------------------
+# Neo4j Configuration
+# --------------------------------
+
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
@@ -15,93 +20,51 @@ driver = GraphDatabase.driver(
 )
 
 
-def graph_search(intents):
+# --------------------------------
+# Graph Search
+# --------------------------------
+
+def graph_search(question: str):
 
     results = []
 
-
     # --------------------------------
-    # Founder
-    # --------------------------------
-
-    if "founder" in intents:
-
-        query = """
-        MATCH (person:Person)-[:FOUNDED]->(company:Company)
-        RETURN
-            person.name AS person,
-            "FOUNDED" AS relationship,
-            company.name AS company
-        """
-
-        with driver.session() as session:
-
-            records = session.run(query)
-
-            for record in records:
-
-                results.append({
-                    "type": "founder",
-                    "person": record["person"],
-                    "relationship": record["relationship"],
-                    "company": record["company"]
-                })
-
-
-    # --------------------------------
-    # CEO
+    # Generic graph query
     # --------------------------------
 
-    if "ceo" in intents:
+    query = """
+    MATCH (source)-[relationship]->(target)
 
-        query = """
-        MATCH (person:Person)-[:CEO_OF]->(company:Company)
-        RETURN
-            person.name AS person,
-            "CEO_OF" AS relationship,
-            company.name AS company
-        """
+    WHERE
+        toLower(coalesce(source.name, "")) CONTAINS toLower($question)
+        OR
+        toLower(coalesce(target.name, "")) CONTAINS toLower($question)
 
-        with driver.session() as session:
+    RETURN
+        labels(source) AS source_labels,
+        source.name AS source,
+        type(relationship) AS relationship,
+        labels(target) AS target_labels,
+        target.name AS target
 
-            records = session.run(query)
+    LIMIT 20
+    """
 
-            for record in records:
+    with driver.session() as session:
 
-                results.append({
-                    "type": "ceo",
-                    "person": record["person"],
-                    "relationship": record["relationship"],
-                    "company": record["company"]
-                })
+        records = session.run(
+            query,
+            question=question
+        )
 
+        for record in records:
 
-    # --------------------------------
-    # Product
-    # --------------------------------
-
-    if "product" in intents:
-
-        query = """
-        MATCH (company:Company)-[:PRODUCES]->(product:Product)
-        RETURN
-            company.name AS company,
-            "PRODUCES" AS relationship,
-            product.name AS product
-        """
-
-        with driver.session() as session:
-
-            records = session.run(query)
-
-            for record in records:
-
-                results.append({
-                    "type": "product",
-                    "company": record["company"],
-                    "relationship": record["relationship"],
-                    "product": record["product"]
-                })
-
+            results.append({
+                "source": record["source"],
+                "source_labels": record["source_labels"],
+                "relationship": record["relationship"],
+                "target": record["target"],
+                "target_labels": record["target_labels"]
+            })
 
     return results
