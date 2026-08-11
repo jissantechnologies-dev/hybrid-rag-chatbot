@@ -9,7 +9,7 @@ import streamlit as st
 
 API_URL = os.getenv(
     "API_URL",
-    "http://127.0.0.1:8000"
+    "http://backend:8000"
 )
 
 CHAT_URL = f"{API_URL}/ask"
