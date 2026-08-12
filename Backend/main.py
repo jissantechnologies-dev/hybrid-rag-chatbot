@@ -1,23 +1,12 @@
-from fastapi import (
-    FastAPI,
-    UploadFile,
-    File,
-    HTTPException
-)
-
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
-
 from pathlib import Path
-import shutil
 
 from .hybrid_rag import hybrid_rag
-
-from .data_ingestion import ingest_file
-
 from .vector_search import (
     add_documents_to_faiss,
     get_indexed_sources,
-    delete_document_from_faiss
+    delete_document_from_faiss,
 )
 
 
@@ -31,34 +20,29 @@ app = FastAPI(
         "Hybrid RAG using FAISS, Neo4j, "
         "LangChain and OpenAI"
     ),
-    version="1.0"
+    version="1.0",
 )
 
 
 # ============================================================
-# PATH
+# PATHS
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent
 
-DOCUMENTS_DIR = (
-    BASE_DIR
-    / "data"
-    / "documents"
-)
+DOCUMENTS_DIR = BASE_DIR / "data" / "documents"
 
 DOCUMENTS_DIR.mkdir(
     parents=True,
-    exist_ok=True
+    exist_ok=True,
 )
 
 
 # ============================================================
-# REQUEST MODEL
+# REQUEST MODELS
 # ============================================================
 
 class QuestionRequest(BaseModel):
-
     question: str
 
 
@@ -68,35 +52,58 @@ class QuestionRequest(BaseModel):
 
 @app.get("/")
 def root():
-
     return {
-        "message":
-        "Hybrid RAG Chatbot API is running"
+        "message": "Hybrid RAG Chatbot API is running",
+        "status": "healthy",
     }
 
 
 # ============================================================
-# CHAT / ASK
+# HEALTH CHECK
+# ============================================================
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
+
+
+# ============================================================
+# ASK QUESTION
 # ============================================================
 
 @app.post("/ask")
-def ask_question(
-    request: QuestionRequest
-):
+def ask_question(request: QuestionRequest):
 
-    answer = hybrid_rag(
-        request.question
-    )
+    question = request.question.strip()
 
-    return {
+    if not question:
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty",
+        )
 
-        "question":
-        request.question,
+    try:
 
-        "answer":
-        answer
-    }
-@app.delete("/documents/{filename}")
+        answer = hybrid_rag(question)
+
+        return {
+            "question": question,
+            "answer": answer,
+        }
+
+    except Exception as e:
+
+        print(
+            f"Error while processing question: {e}"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process question: {str(e)}",
+        )
+
 
 # ============================================================
 # UPLOAD DOCUMENT
@@ -114,10 +121,17 @@ async def upload_document(
     if not file.filename:
         raise HTTPException(
             status_code=400,
-            detail="No filename provided"
+            detail="No filename provided",
         )
 
-    filename = file.filename
+    # Remove any path information
+    safe_filename = Path(file.filename).name
+
+    if not safe_filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid filename",
+        )
 
     # --------------------------------------------------------
     # Allowed file types
@@ -127,40 +141,45 @@ async def upload_document(
         ".pdf",
         ".docx",
         ".txt",
-        ".json"
+        ".json",
     }
 
-    extension = Path(filename).suffix.lower()
+    extension = Path(
+        safe_filename
+    ).suffix.lower()
 
     if extension not in allowed_extensions:
+
         raise HTTPException(
             status_code=400,
             detail=(
                 "Unsupported file type. "
                 "Allowed: PDF, DOCX, TXT, JSON"
-            )
+            ),
         )
 
     # --------------------------------------------------------
-    # Prevent path traversal
+    # File path
     # --------------------------------------------------------
-
-    safe_filename = Path(filename).name
 
     file_path = DOCUMENTS_DIR / safe_filename
 
     # --------------------------------------------------------
-    # Check duplicate file
+    # Check duplicate
     # --------------------------------------------------------
 
     if file_path.exists():
+
         raise HTTPException(
             status_code=409,
-            detail=f"Document already exists: {safe_filename}"
+            detail=(
+                f"Document already exists: "
+                f"{safe_filename}"
+            ),
         )
 
     # --------------------------------------------------------
-    # Save uploaded file
+    # Save file
     # --------------------------------------------------------
 
     try:
@@ -178,7 +197,9 @@ async def upload_document(
 
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to save document: {str(e)}"
+            detail=(
+                f"Failed to save document: {str(e)}"
+            ),
         )
 
     # --------------------------------------------------------
@@ -187,42 +208,65 @@ async def upload_document(
 
     try:
 
-        chunks_added = add_document_to_faiss(
+        # IMPORTANT:
+        # This uses the function that you actually imported:
+        #
+        # add_documents_to_faiss
+        #
+        # If your vector_search.py expects a list of files,
+        # change this to:
+        #
+        # add_documents_to_faiss([file_path])
+
+        result = add_documents_to_faiss(
             file_path
         )
 
         print(
-            f"FAISS chunks added: {chunks_added}"
+            f"FAISS indexing result: {result}"
         )
 
     except Exception as e:
 
-        # If indexing fails, remove the physical file
-        # so the system does not show an unindexed document.
+        # Remove physical file if indexing failed
 
         if file_path.exists():
             file_path.unlink()
 
+        print(
+            f"FAISS indexing failed: {e}"
+        )
+
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to index document: {str(e)}"
+            detail=(
+                f"Failed to index document: {str(e)}"
+            ),
         )
+
+    # --------------------------------------------------------
+    # Determine chunks added
+    # --------------------------------------------------------
+
+    if isinstance(result, int):
+        chunks_added = result
+    else:
+        chunks_added = 0
 
     # --------------------------------------------------------
     # Response
     # --------------------------------------------------------
 
     return {
-
-        "message":
-            "Document uploaded and indexed successfully",
-
-        "filename":
-            safe_filename,
-
-        "chunks_added":
-            chunks_added
+        "message": (
+            "Document uploaded and indexed "
+            "successfully"
+        ),
+        "filename": safe_filename,
+        "chunks_added": chunks_added,
     }
+
+
 # ============================================================
 # LIST DOCUMENTS
 # ============================================================
@@ -230,32 +274,32 @@ async def upload_document(
 @app.get("/documents")
 def list_documents():
 
-    documents = get_indexed_sources()
+    try:
 
-    return {
-        "documents": documents
-    }
+        documents = get_indexed_sources()
 
-# ============================================================
-# GET DOCUMENT LIST
-# ============================================================
+        # Make sure the response is always a list
+        if documents is None:
+            documents = []
 
-@app.get("/documents")
-def get_documents():
+        return {
+            "documents": documents,
+            "count": len(documents),
+        }
 
-    files = []
+    except Exception as e:
 
-    if DOCUMENTS_DIR.exists():
+        print(
+            f"Error while listing documents: {e}"
+        )
 
-        for file_path in DOCUMENTS_DIR.iterdir():
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Failed to retrieve documents: {str(e)}"
+            ),
+        )
 
-            if file_path.is_file():
-
-                files.append(file_path.name)
-
-    return {
-        "documents": sorted(files)
-    }
 
 # ============================================================
 # DELETE DOCUMENT
@@ -264,15 +308,43 @@ def get_documents():
 @app.delete("/documents/{filename}")
 def delete_document(filename: str):
 
-    file_path = DOCUMENTS_DIR / filename
+    # --------------------------------------------------------
+    # Prevent path traversal
+    # --------------------------------------------------------
+
+    safe_filename = Path(filename).name
+
+    if not safe_filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid filename",
+        )
+
+    file_path = DOCUMENTS_DIR / safe_filename
 
     # --------------------------------------------------------
     # Delete from FAISS
     # --------------------------------------------------------
 
-    deleted_chunks = delete_document_from_faiss(
-        filename
-    )
+    try:
+
+        deleted_chunks = delete_document_from_faiss(
+            safe_filename
+        )
+
+    except Exception as e:
+
+        print(
+            f"FAISS delete failed: {e}"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Failed to delete document "
+                f"from FAISS: {str(e)}"
+            ),
+        )
 
     # --------------------------------------------------------
     # Delete physical file
@@ -282,34 +354,42 @@ def delete_document(filename: str):
 
     if file_path.exists():
 
-        file_path.unlink()
+        try:
 
-        file_deleted = True
+            file_path.unlink()
 
+            file_deleted = True
+
+        except Exception as e:
+
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    f"Failed to delete physical "
+                    f"file: {str(e)}"
+                ),
+            )
 
     # --------------------------------------------------------
-    # Result
+    # Document not found
     # --------------------------------------------------------
 
     if deleted_chunks == 0 and not file_deleted:
 
         raise HTTPException(
             status_code=404,
-            detail="Document not found"
+            detail="Document not found",
         )
 
+    # --------------------------------------------------------
+    # Response
+    # --------------------------------------------------------
 
     return {
-
-        "message":
-            "Document deleted successfully",
-
-        "filename":
-            filename,
-
-        "deleted_chunks":
-            deleted_chunks,
-
-        "file_deleted":
-            file_deleted
+        "message": (
+            "Document deleted successfully"
+        ),
+        "filename": safe_filename,
+        "deleted_chunks": deleted_chunks,
+        "file_deleted": file_deleted,
     }
